@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import com.pam_228779.weatherapppro.R
 import com.pam_228779.weatherapppro.data.db.entities.LocationEntity
@@ -12,7 +13,7 @@ import com.pam_228779.weatherapppro.viewModel.WeatherViewModel
 
 class WeatherFragment : Fragment() {
 
-    private lateinit var weatherViewModel: WeatherViewModel
+    private val weatherViewModel: WeatherViewModel by activityViewModels()
     private lateinit var location: LocationEntity
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,7 +21,6 @@ class WeatherFragment : Fragment() {
         arguments?.let {
             location = it.getParcelable("location")!!
         }
-        weatherViewModel = ViewModelProvider(requireActivity()).get(WeatherViewModel::class.java)
     }
 
     override fun onCreateView(

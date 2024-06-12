@@ -8,10 +8,8 @@ import kotlinx.parcelize.Parcelize
 @Entity(tableName = "locations")
 @Parcelize
 data class LocationEntity(
-//    @PrimaryKey(autoGenerate = true)
-    @PrimaryKey
-    val id: Int = 0,
-
+    @PrimaryKey(autoGenerate = true)
+    val id: Int,
     val name: String,
     val lat: Double,
     val lon: Double,

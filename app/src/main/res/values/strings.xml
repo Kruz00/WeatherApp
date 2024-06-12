@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">WeatherAppPro</string>
+    <string name="delete_location">Delete location</string>
+    <string name="location_name_hint">Wpisz nazwę miejscowości</string>
+    <string name="search">Szukaj</string>
+    <string name="add_location">Dodaj lokalizację</string>
 </resources>

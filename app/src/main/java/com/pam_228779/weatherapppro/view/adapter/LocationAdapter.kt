@@ -1,5 +1,16 @@
 package com.pam_228779.weatherapppro.view.adapter
 
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.pam_228779.weatherapppro.R
+import com.pam_228779.weatherapppro.data.db.entities.LocationEntity
+
 
 class LocationAdapter(private val onDeleteClick: (LocationEntity) -> Unit) :
     ListAdapter<LocationEntity, LocationAdapter.LocationViewHolder>(LocationsComparator()) {
@@ -28,8 +39,9 @@ class LocationAdapter(private val onDeleteClick: (LocationEntity) -> Unit) :
 
     inner class LocationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(location: LocationEntity) {
-            itemView.locationName.text = location.name
-            itemView.deleteButton.setOnClickListener { onDeleteClick(location) }
+            itemView.findViewById<TextView>(R.id.locationName).text = location.name
+            itemView.findViewById<ImageButton>(R.id.deleteButton)
+                .setOnClickListener { onDeleteClick(location) }
         }
     }
 

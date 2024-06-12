@@ -1,10 +1,10 @@
 package com.pam_228779.weatherapppro.viewModel
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.pam_228779.weatherapppro.data.api.WeatherApiClient
@@ -17,9 +17,13 @@ import kotlinx.coroutines.launch
 class LocationViewModel(
     private val repository: LocationRepository
 ) : ViewModel() {
+
     val allLocations: LiveData<List<LocationEntity>> = repository.allLocations
 
-    fun addLocation(location: LocationEntity) {
+    private val _searchResults = MutableLiveData<List<Location>>()
+    val searchResults: LiveData<List<Location>> get() = _searchResults
+
+    fun addLocation(location: Location) {
         viewModelScope.launch {
             repository.addLocation(location)
         }
@@ -31,8 +35,11 @@ class LocationViewModel(
         }
     }
 
-    fun searchLocations(query: String): LiveData<List<Location>> = liveData {
-        repository.searchLocations(query)?.let { emit(it) }
+    fun searchLocations(query: String) {
+        viewModelScope.launch {
+            val results = repository.searchLocations(query)
+            _searchResults.postValue(results)
+        }
     }
 
     companion object {
