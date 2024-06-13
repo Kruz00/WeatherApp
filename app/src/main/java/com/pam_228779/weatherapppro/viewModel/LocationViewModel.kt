@@ -42,6 +42,12 @@ class LocationViewModel(
         }
     }
 
+    fun resetSearchLocations() {
+        viewModelScope.launch {
+            _searchResults.postValue(emptyList())
+        }
+    }
+
     companion object {
 
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {

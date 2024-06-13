@@ -14,8 +14,8 @@ class LocationRepository(
 ) {
     val allLocations: LiveData<List<LocationEntity>> = locationDao.getAllLocations()
 
-    suspend fun addLocation(location: Location) {
-        locationDao.insert(locationToEntity(location))
+    suspend fun addLocation(location: Location): Long {
+        return locationDao.insert(locationToEntity(location))
     }
 
     suspend fun deleteLocation(location: LocationEntity) {
@@ -23,9 +23,13 @@ class LocationRepository(
     }
 
 
-    suspend fun searchLocations(query: String): List<Location>? {
+    suspend fun searchLocations(query: String): List<Location> {
         return withContext(Dispatchers.IO) {
-            weatherApiClient.getLocations(query, 5)
+            val locations = weatherApiClient.getLocations(query, 5)
+            if (locations == null) {
+                 emptyList<Location>()
+            }
+            locations!!
         }
     }
 

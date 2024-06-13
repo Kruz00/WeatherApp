@@ -18,18 +18,21 @@ interface LocationDao {
 //    fun getLocation(): LiveData<List<LocationEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(location: LocationEntity)
+    suspend fun insert(location: LocationEntity): Long
 
     @Delete
     suspend fun delete(location: LocationEntity)
 
 
 
+    @Query("SELECT * FROM locations WHERE rowId = :rowId")
+    suspend fun getLocationByRowId(rowId: Long): LocationEntity?
+
     @Query("SELECT * FROM locations WHERE name = :name")
     suspend fun getLocation(name: String): LocationEntity?
 
     @Query("SELECT * FROM locations WHERE id = :id")
-    suspend fun getLocation(id: Int): LocationEntity?
+    suspend fun getLocationById(id: Int): LocationEntity?
 
     @Update
     suspend fun updateLocations(location: LocationEntity)

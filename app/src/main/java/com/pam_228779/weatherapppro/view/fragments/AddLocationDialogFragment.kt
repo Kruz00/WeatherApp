@@ -32,7 +32,6 @@ class AddLocationDialogFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val searchButton: Button = view.findViewById(R.id.searchButton)
-//        val addButton: Button = view.findViewById(R.id.addButton)
         val locationInput: EditText = view.findViewById(R.id.locationInput)
         val searchResultsRecyclerView: RecyclerView = view.findViewById(R.id.searchResultsRecyclerView)
 
@@ -46,23 +45,10 @@ class AddLocationDialogFragment : DialogFragment() {
         locationViewModel.searchResults.observe(viewLifecycleOwner, Observer {locations ->
             searchResultsRecyclerView.adapter = LocationSearchAdapter(locations) { selectedLocation ->
                 locationViewModel.addLocation(selectedLocation)
+                locationViewModel.resetSearchLocations()
+                dismiss()
 //              weatherViewModel.refreshWeather(locationEntity)
-
-//                addButton.visibility = View.VISIBLE
-//                addButton.setOnClickListener {
-//                    locationViewModel.addLocation(selectedLocation)
-////                    weatherViewModel.refreshWeather(locationEntity)
-//                    dismiss()
-//                }
             }
         })
-
-//        addButton.setOnClickListener {
-//            val selectedLocation: Location = // get selected location from your RecyclerView
-//
-//            val locationEntity = locationViewModel.addLocation(selectedLocation)
-//            weatherViewModel.refreshWeather(locationEntity)
-//            dismiss()
-//        }
     }
 }
