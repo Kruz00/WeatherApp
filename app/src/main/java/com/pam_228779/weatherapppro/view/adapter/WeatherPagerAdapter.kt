@@ -17,7 +17,8 @@ class WeatherPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(act
     override fun createFragment(position: Int): Fragment {
         val fragment = WeatherFragment()
         fragment.arguments = Bundle().apply {
-            putParcelable("location", locations[position])
+//            putParcelable("location", locations[position])
+            putParcelable("locationEntity", locations[position])
         }
         return fragment
     }
