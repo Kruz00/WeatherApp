@@ -1,6 +1,7 @@
 package com.pam_228779.weatherapppro.view.adapter
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -14,11 +15,28 @@ class WeatherPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(act
 
     override fun getItemCount(): Int = locations.size
 
+    override fun getItemId(position: Int): Long {
+        Log.i("WeatherPagerAdapter", "getItemId - position: $position, itemId: ${locations[position].id}, name:${locations[position].name}")
+        return locations[position].id.toLong()
+    }
+
+    override fun containsItem(itemId: Long): Boolean {
+        return locations.any { it.id.toLong() == itemId }
+    }
+
+//    override fun getItemId(position: Int): Long {
+//        val itemId = locations.indexOfFirst { it.order == position }
+//        Log.i("WeatherPagerAdapter", "getItemId - position: $position, itemId: $itemId, name:${locations[itemId].name}")
+//        return itemId.toLong()
+////        return super.getItemId(position)
+//    }
+
     override fun createFragment(position: Int): Fragment {
         val fragment = WeatherFragment()
         fragment.arguments = Bundle().apply {
 //            putParcelable("location", locations[position])
             putParcelable("locationEntity", locations[position])
+            Log.i("WeatherPagerAdapter", "createFragment - position: $position, order: ${locations[position].order}")
         }
         return fragment
     }

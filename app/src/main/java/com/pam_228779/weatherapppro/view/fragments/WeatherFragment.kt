@@ -1,6 +1,7 @@
 package com.pam_228779.weatherapppro.view.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,8 +26,6 @@ class WeatherFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_weather, container, false)
 
-        // Setup UI to display weather data
-
         return view
     }
 
@@ -36,8 +35,9 @@ class WeatherFragment : Fragment() {
         val locationNameTextView: TextView = view.findViewById(R.id.WeatherLocationName)
         val hourlyRecyclerView: RecyclerView = view.findViewById(R.id.hourly_forecast_recyclerview)
 
-        val locationEntity = arguments?.getParcelable("locationEntity", LocationEntity::class.java)
+        val locationEntity: LocationEntity? = arguments?.getParcelable("locationEntity")
         locationNameTextView.text = locationEntity?.name
+        Log.i("WeatherFragment", "onViewCreated - order: ${locationEntity?.order}")
 
 
 //        hourlyRecyclerView.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)

@@ -14,5 +14,6 @@ data class LocationEntity(
     val lat: Double,
     val lon: Double,
     val country: String,
-    val state: String
+    val state: String,
+    val order: Int
 ) : Parcelable

@@ -2,25 +2,21 @@ package com.pam_228779.weatherapppro.view.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.widget.ViewPager2
 import com.pam_228779.weatherapppro.R
-import com.pam_228779.weatherapppro.data.api.WeatherApiClient
-import com.pam_228779.weatherapppro.data.db.AppDatabase
-import com.pam_228779.weatherapppro.repository.LocationRepository
-import com.pam_228779.weatherapppro.repository.WeatherRepository
 import com.pam_228779.weatherapppro.view.adapter.WeatherPagerAdapter
 import com.pam_228779.weatherapppro.viewModel.LocationViewModel
-import com.pam_228779.weatherapppro.viewModel.ViewModelFactory
 import com.pam_228779.weatherapppro.viewModel.WeatherViewModel
 
 
 class MainActivity : AppCompatActivity() {
+    private val TAG = "MainActivity"
 
     private lateinit var viewPager: ViewPager2
     private lateinit var adapter: WeatherPagerAdapter
@@ -31,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        viewPager = findViewById(R.id.viewPager)
+        viewPager = findViewById(R.id.mainViewPager)
 
 //        val weatherApiClient = WeatherApiClient()
 //        val locationDao = AppDatabase.getDatabase(application).locationDao()
@@ -50,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         locationViewModel.allLocations.observe(this, Observer { locations ->
             locations?.let {
                 adapter.submitList(it)
+                Log.i(TAG, "locations updated by observator")
             }
         })
     }
@@ -73,4 +70,18 @@ class MainActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i(TAG, "$TAG Activity paused")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.i(TAG, "$TAG Activity resumed")
+        // update location list order
+//        adapter.submitList()
+
+    }
+
 }

@@ -22,6 +22,9 @@ class LocationRepository(
         locationDao.delete(location)
     }
 
+    suspend fun updateLocationOrder(newOrderedList: List<LocationEntity>) {
+        locationDao.updateLocationListOrder(newOrderedList)
+    }
 
     suspend fun searchLocations(query: String): List<Location> {
         return withContext(Dispatchers.IO) {
@@ -40,7 +43,8 @@ class LocationRepository(
             lat = location.lat,
             lon = location.lon,
             country = location.country,
-            state = location.state
+            state = location.state,
+            order = allLocations.value?.size ?: 0
         )
     }
 

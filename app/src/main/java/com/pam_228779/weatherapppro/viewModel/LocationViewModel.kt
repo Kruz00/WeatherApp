@@ -35,6 +35,12 @@ class LocationViewModel(
         }
     }
 
+    fun updateLocationOrder(newOrderedList: List<LocationEntity>) {
+        viewModelScope.launch {
+            repository.updateLocationOrder(newOrderedList)
+        }
+    }
+
     fun searchLocations(query: String) {
         viewModelScope.launch {
             val results = repository.searchLocations(query)

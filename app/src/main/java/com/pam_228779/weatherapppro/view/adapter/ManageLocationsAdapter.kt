@@ -12,8 +12,8 @@ import com.pam_228779.weatherapppro.R
 import com.pam_228779.weatherapppro.data.db.entities.LocationEntity
 
 
-class LocationAdapter(private val onDeleteClick: (LocationEntity) -> Unit) :
-    ListAdapter<LocationEntity, LocationAdapter.LocationViewHolder>(LocationsComparator()) {
+class ManageLocationsAdapter(private val onDeleteClick: (LocationEntity) -> Unit) :
+    ListAdapter<LocationEntity, ManageLocationsAdapter.LocationViewHolder>(LocationsComparator()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocationViewHolder {
         val itemView = LayoutInflater.from(parent.context)
