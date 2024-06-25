@@ -6,5 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "weathers")
 data class WeatherEntity(
     @PrimaryKey val locationId: Int,
-    val weatherData: String             // JSON-serialized Weather object
+    val lat: Double,
+    val lon: Double,
+    var weatherData: String?             // JSON-serialized Weather object
 )

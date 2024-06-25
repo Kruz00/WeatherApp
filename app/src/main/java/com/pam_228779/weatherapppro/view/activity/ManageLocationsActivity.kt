@@ -36,6 +36,7 @@ class ManageLocationsActivity : AppCompatActivity() {
         locationsAdapter =
             ManageLocationsAdapter { location ->
                 locationViewModel.deleteLocation(location)
+                weatherViewModel.deleteWeather(location.id)
                 locationViewModel.updateLocationOrder(locationsAdapter.currentList)
             }
         recyclerView.adapter = locationsAdapter
@@ -73,6 +74,7 @@ class ManageLocationsActivity : AppCompatActivity() {
                 val position = viewHolder.adapterPosition
                 val location = locationsAdapter.getLocationAtPosition(position)
                 locationViewModel.deleteLocation(location)
+                weatherViewModel.deleteWeather(location.id)
                 Log.i(TAG, "onSwiped - deleted location: ${location.name}")
             }
         }

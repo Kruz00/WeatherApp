@@ -15,7 +15,7 @@ class LocationSearchAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocationViewHolder {
         val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.search_location_item, parent, false)
+            .inflate(R.layout.item_search_location, parent, false)
         return LocationViewHolder(itemView)
     }
 
@@ -29,6 +29,7 @@ class LocationSearchAdapter(
     inner class LocationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(location: Location) {
             itemView.findViewById<TextView>(R.id.searchLocationName).text = location.name
+            itemView.findViewById<TextView>(R.id.searchLocationInfo).text = "${location.state}, ${location.country}"
             itemView.setOnClickListener { onItemClick(location) }
         }
     }

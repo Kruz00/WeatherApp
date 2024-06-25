@@ -19,7 +19,6 @@ import com.pam_228779.weatherapppro.viewModel.WeatherViewModel
 class AddLocationDialogFragment : DialogFragment() {
 
     private val locationViewModel: LocationViewModel by activityViewModels()
-    private val weatherViewModel: WeatherViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,10 +44,15 @@ class AddLocationDialogFragment : DialogFragment() {
         locationViewModel.searchResults.observe(viewLifecycleOwner, Observer {locations ->
             searchResultsRecyclerView.adapter = LocationSearchAdapter(locations) { selectedLocation ->
                 locationViewModel.addLocation(selectedLocation)
-                locationViewModel.resetSearchLocations()
+
                 dismiss()
 //              weatherViewModel.refreshWeather(locationEntity)
             }
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        locationViewModel.resetSearchLocations()
     }
 }

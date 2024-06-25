@@ -17,7 +17,7 @@ class ManageLocationsAdapter(private val onDeleteClick: (LocationEntity) -> Unit
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocationViewHolder {
         val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.location_item, parent, false)
+            .inflate(R.layout.item_location, parent, false)
         return LocationViewHolder(itemView)
     }
 

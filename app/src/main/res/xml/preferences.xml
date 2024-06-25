@@ -8,10 +8,11 @@
         android:entryValues="@array/units_values"
         android:defaultValue="metric" />
 
-    <EditTextPreference
+    <ListPreference
         android:key="refresh_interval"
-        android:title="Refresh Interval"
-        android:inputType="number"
+        android:title="Time to refresh data"
+        android:entries="@array/refresh_options"
+        android:entryValues="@array/refresh_values"
         android:defaultValue="15" />
 
 </PreferenceScreen>

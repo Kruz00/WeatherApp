@@ -9,7 +9,7 @@ import com.pam_228779.weatherapppro.data.db.dao.WeatherDao
 import com.pam_228779.weatherapppro.data.db.entities.LocationEntity
 import com.pam_228779.weatherapppro.data.db.entities.WeatherEntity
 
-@Database(entities = [LocationEntity::class, WeatherEntity::class], version = 1)
+@Database(entities = [LocationEntity::class, WeatherEntity::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun locationDao(): LocationDao
     abstract fun weatherDao(): WeatherDao

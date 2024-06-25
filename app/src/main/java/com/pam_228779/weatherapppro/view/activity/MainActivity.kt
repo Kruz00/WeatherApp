@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
 import androidx.viewpager2.widget.ViewPager2
 import com.pam_228779.weatherapppro.R
 import com.pam_228779.weatherapppro.view.adapter.WeatherPagerAdapter
@@ -29,16 +31,8 @@ class MainActivity : AppCompatActivity() {
 
         viewPager = findViewById(R.id.mainViewPager)
 
-//        val weatherApiClient = WeatherApiClient()
-//        val locationDao = AppDatabase.getDatabase(application).locationDao()
-//        val weatherDao = AppDatabase.getDatabase(application).weatherDao()
-//        val locationRepository = LocationRepository(locationDao, weatherApiClient)
-//        val weatherRepository = WeatherRepository(weatherDao, weatherApiClient)
-//        val viewModelFactory = ViewModelFactory(locationRepository, weatherRepository)
-//
-//        locationViewModel = ViewModelProvider(this, viewModelFactory).get(LocationViewModel::class.java)
-//        weatherViewModel = ViewModelProvider(this, viewModelFactory).get(WeatherViewModel::class.java)
-
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
+        weatherViewModel.refreshAllWeathers()
         adapter = WeatherPagerAdapter(this)
         viewPager.adapter = adapter
 
@@ -65,6 +59,14 @@ class MainActivity : AppCompatActivity() {
             R.id.manage_locations -> {
                 val intent = Intent(this, ManageLocationsActivity::class.java)
                 startActivity(intent)
+                true
+            }
+            R.id.refresh_weather -> {
+                weatherViewModel.forceRefreshAllWeathers(
+                    { Toast.makeText(applicationContext, "Refreshing...", Toast.LENGTH_SHORT).show() },
+                    { Toast.makeText(applicationContext, "Weathers updated!", Toast.LENGTH_SHORT).show() },
+                    { Toast.makeText(applicationContext, "Cannot update data, check internet connection!", Toast.LENGTH_LONG).show() }
+                )
                 true
             }
             else -> super.onOptionsItemSelected(item)
