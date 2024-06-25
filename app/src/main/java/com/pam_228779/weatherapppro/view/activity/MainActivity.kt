@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var viewPager: ViewPager2
     private lateinit var adapter: WeatherPagerAdapter
-    private val locationViewModel: LocationViewModel  by viewModels { LocationViewModel.Factory }
+    private val locationViewModel: LocationViewModel by viewModels { LocationViewModel.Factory }
     private val weatherViewModel: WeatherViewModel by viewModels { WeatherViewModel.Factory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +43,10 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG, "locations updated by observator")
             }
         })
+
+        weatherViewModel.userMessage.observe(this) { message ->
+            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -56,19 +60,18 @@ class MainActivity : AppCompatActivity() {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 true
             }
+
             R.id.manage_locations -> {
                 val intent = Intent(this, ManageLocationsActivity::class.java)
                 startActivity(intent)
                 true
             }
+
             R.id.refresh_weather -> {
-                weatherViewModel.forceRefreshAllWeathers(
-                    { Toast.makeText(applicationContext, "Refreshing...", Toast.LENGTH_SHORT).show() },
-                    { Toast.makeText(applicationContext, "Weathers updated!", Toast.LENGTH_SHORT).show() },
-                    { Toast.makeText(applicationContext, "Cannot update data, check internet connection!", Toast.LENGTH_LONG).show() }
-                )
+                weatherViewModel.forceRefreshAllWeathers()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

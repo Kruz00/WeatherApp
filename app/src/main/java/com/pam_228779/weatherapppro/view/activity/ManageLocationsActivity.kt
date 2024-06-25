@@ -3,6 +3,7 @@ package com.pam_228779.weatherapppro.view.activity
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -31,6 +32,10 @@ class ManageLocationsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_manage_locations)
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        locationViewModel.userMessage.observe(this) { message ->
+            Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+        }
 
         val recyclerView = findViewById<RecyclerView>(R.id.manageLocationRecyclerView)
         locationsAdapter =

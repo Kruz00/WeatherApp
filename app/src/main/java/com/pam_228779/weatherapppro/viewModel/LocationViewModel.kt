@@ -12,16 +12,21 @@ import com.pam_228779.weatherapppro.data.db.AppDatabase
 import com.pam_228779.weatherapppro.data.db.entities.LocationEntity
 import com.pam_228779.weatherapppro.data.model.Location
 import com.pam_228779.weatherapppro.repository.LocationRepository
+import com.pam_228779.weatherapppro.utils.NetworkUtils
 import kotlinx.coroutines.launch
 
 class LocationViewModel(
-    private val repository: LocationRepository
+    private val repository: LocationRepository,
+    private val networkUtils: NetworkUtils
 ) : ViewModel() {
 
     val allLocations: LiveData<List<LocationEntity>> = repository.allLocations
 
     private val _searchResults = MutableLiveData<List<Location>>()
     val searchResults: LiveData<List<Location>> get() = _searchResults
+
+    private val _userMessage = MutableLiveData<String>()
+    val userMessage: LiveData<String> get() = _userMessage
 
     fun addLocation(location: Location) {
         viewModelScope.launch {
@@ -43,8 +48,12 @@ class LocationViewModel(
 
     fun searchLocations(query: String) {
         viewModelScope.launch {
-            val results = repository.searchLocations(query)
-            _searchResults.postValue(results)
+            if(networkUtils.isInternetAvailable()) {
+                val results = repository.searchLocations(query)
+                _searchResults.postValue(results)
+            } else {
+                _userMessage.postValue("No internet connection!")
+            }
         }
     }
 
@@ -67,10 +76,12 @@ class LocationViewModel(
                 val weatherApiClient = WeatherApiClient()
                 val locationDao = AppDatabase.getDatabase(application).locationDao()
                 val locationRepository = LocationRepository(locationDao, weatherApiClient)
+                val networkUtils = NetworkUtils(application.applicationContext)
 
                 // Create a SavedStateHandle for this ViewModel from extras
                 return LocationViewModel(
-                    locationRepository
+                    locationRepository,
+                    networkUtils
                 ) as T
             }
         }

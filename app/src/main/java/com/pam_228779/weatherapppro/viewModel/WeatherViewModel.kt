@@ -2,7 +2,9 @@ package com.pam_228779.weatherapppro.viewModel
 
 import android.content.SharedPreferences
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -13,7 +15,7 @@ import com.pam_228779.weatherapppro.data.db.AppDatabase
 import com.pam_228779.weatherapppro.data.db.entities.LocationEntity
 import com.pam_228779.weatherapppro.data.model.WeatherData
 import com.pam_228779.weatherapppro.repository.WeatherRepository
-import kotlinx.coroutines.CoroutineStart
+import com.pam_228779.weatherapppro.utils.NetworkUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,9 +28,13 @@ private const val MINUTES_TO_REFRESH_DEFAULT = 15
 class WeatherViewModel(
     private val repository: WeatherRepository,
     private val preferences: SharedPreferences,
+    private val networkUtils: NetworkUtils
 ) : ViewModel() {
     private val TAG = "WeatherViewModel"
     private val weatherDataMap = mutableMapOf<Int, LiveData<WeatherData?>>()
+
+    private val _userMessage = MutableLiveData<String>()
+    val userMessage: LiveData<String> get() = _userMessage
 
     fun getWeather(location: LocationEntity): LiveData<WeatherData?> {
         return weatherDataMap.getOrPut(location.id) {
@@ -50,8 +56,12 @@ class WeatherViewModel(
 
     fun refreshWeather(location: LocationEntity) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                repository.refreshWeather(location)
+            if(networkUtils.isInternetAvailable()) {
+                withContext(Dispatchers.IO) {
+                    repository.refreshWeather(location)
+                }
+            } else {
+                _userMessage.postValue("No internet connection")
             }
         }
 
@@ -74,20 +84,28 @@ class WeatherViewModel(
                     )
                     if (now.isAfter(lastRefreshInstant.plus(minutesToRefresh, ChronoUnit.MINUTES))
                     ) {
-                        repository.refreshAllWeathers()
+                        if(networkUtils.isInternetAvailable()) {
+                            repository.refreshAllWeathers()
+                            _userMessage.postValue("Forecasts updated!")
+                        } else {
+                            _userMessage.postValue("No internet connection, forecast may be not accurate")
+                        }
                     }
                 }
             }
         }
     }
 
-    fun forceRefreshAllWeathers(onStartRefreshing: () -> Unit, onEndRefreshing: () -> Unit, onConnError: () -> Unit) {
+    fun forceRefreshAllWeathers() {
         viewModelScope.launch {
-//            onStartRefreshing()
-            withContext(Dispatchers.IO) {
-                repository.refreshAllWeathers()
+            if(networkUtils.isInternetAvailable()) {
+                withContext(Dispatchers.IO) {
+                    repository.refreshAllWeathers()
+                }
+                _userMessage.postValue("Forecasts updated!!")
+            } else {
+                _userMessage.postValue("No internet connection!")
             }
-            onEndRefreshing()
         }
 
     }
@@ -108,11 +126,13 @@ class WeatherViewModel(
                 val weatherRepository = WeatherRepository(weatherDao, weatherApiClient)
                 val sharedPreferences =
                     PreferenceManager.getDefaultSharedPreferences(application.applicationContext)
+                val networkUtils = NetworkUtils(application.applicationContext)
 
                 // Create a SavedStateHandle for this ViewModel from extras
                 return WeatherViewModel(
                     weatherRepository,
-                    sharedPreferences
+                    sharedPreferences,
+                    networkUtils
                 ) as T
             }
         }
