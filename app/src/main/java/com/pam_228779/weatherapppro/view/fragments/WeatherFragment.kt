@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,7 +25,7 @@ class WeatherFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         val view = inflater.inflate(R.layout.fragment_weather, container, false)
 
@@ -34,11 +33,14 @@ class WeatherFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        // TODO ogarnac reset przy obrocie ekranu
         super.onViewCreated(view, savedInstanceState)
 
-        location = arguments?.getParcelable("locationEntity")!!
         hourlyRecyclerView = view.findViewById(R.id.hourly_forecast_recyclerview)
         dailyRecyclerView = view.findViewById(R.id.daily_forecast_recyclerview)
+
+
+        location = arguments?.getParcelable("locationEntity")!!
 
         val hourlyLayoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -46,6 +48,14 @@ class WeatherFragment : Fragment() {
 
         val dailyLayoutManager = LinearLayoutManager(context)
         dailyRecyclerView.layoutManager = dailyLayoutManager
+
+        val currentWeatherFragment = CurrentWeatherFragment()
+        currentWeatherFragment.arguments = Bundle().apply {
+            putParcelable("locationEntity", location)
+        }
+        childFragmentManager.beginTransaction()
+            .replace(R.id.currentWeatherContainer, currentWeatherFragment)
+            .commit()
 
         weatherViewModel.getWeather(location).observe(viewLifecycleOwner) { weatherData ->
             // Setup hourly forecast RecyclerView
@@ -57,24 +67,6 @@ class WeatherFragment : Fragment() {
             dailyRecyclerView.adapter = dailyAdapter
         }
 
-        val locationNameTextView: TextView = view.findViewById(R.id.weatherLocationName)
-
-        locationNameTextView.text = location.name
         Log.i("WeatherFragment", "onViewCreated - order: ${location.order}")
-
-
-//        hourlyRecyclerView.layoutManager = LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
-//        val weatherAdapter = HourlyWeatherAdapter()
-//        hourlyRecyclerView.adapter = weatherAdapter
-//
-//        weatherViewModel.weatherData.observe(viewLifecycleOwner, Observer { weather ->
-//            weather?.let {
-//                weatherAdapter.submitList(it)
-//            }
-//        })
-//
-//        // Fetch weather data for the provided locationId
-//        val locationId = arguments?.getInt("locationId") ?: 0
-//        weatherViewModel.getWeather(locationId)
     }
 }

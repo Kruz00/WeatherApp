@@ -28,7 +28,7 @@ private const val MINUTES_TO_REFRESH_DEFAULT = 15
 class WeatherViewModel(
     private val repository: WeatherRepository,
     private val preferences: SharedPreferences,
-    private val networkUtils: NetworkUtils
+    private val networkUtils: NetworkUtils,
 ) : ViewModel() {
     private val TAG = "WeatherViewModel"
     private val weatherDataMap = mutableMapOf<Int, LiveData<WeatherData?>>()
@@ -56,9 +56,9 @@ class WeatherViewModel(
 
     fun refreshWeather(location: LocationEntity) {
         viewModelScope.launch {
-            if(networkUtils.isInternetAvailable()) {
+            if (networkUtils.isInternetAvailable()) {
                 withContext(Dispatchers.IO) {
-                    repository.refreshWeather(location)
+                    repository.refreshWeather(location, preferences.getString("units", "metric")!!)
                 }
             } else {
                 _userMessage.postValue("No internet connection")
@@ -76,16 +76,24 @@ class WeatherViewModel(
                     val lastRefreshInstant =
                         Instant.ofEpochSecond(oldestWeather.current.dt.toLong())
                     val minutesToRefresh =
-                        preferences.getString("refresh_interval",
+                        preferences.getString(
+                            "refresh_interval",
                             MINUTES_TO_REFRESH_DEFAULT.toString()
                         )!!.toLong()
                     val now = Instant.now()
-                    Log.i(TAG, "lastRefresh: ${lastRefreshInstant}\nminutesToRefresh: $minutesToRefresh\nInstantNow: $now"
+                    Log.i(
+                        TAG,
+                        "lastRefresh: ${lastRefreshInstant}\nminutesToRefresh: $minutesToRefresh\nInstantNow: $now"
                     )
                     if (now.isAfter(lastRefreshInstant.plus(minutesToRefresh, ChronoUnit.MINUTES))
                     ) {
-                        if(networkUtils.isInternetAvailable()) {
-                            repository.refreshAllWeathers()
+                        if (networkUtils.isInternetAvailable()) {
+                            repository.refreshAllWeathers(
+                                preferences.getString(
+                                    "units",
+                                    "metric"
+                                )!!
+                            )
                             _userMessage.postValue("Forecasts updated!")
                         } else {
                             _userMessage.postValue("No internet connection, forecast may be not accurate")
@@ -98,9 +106,9 @@ class WeatherViewModel(
 
     fun forceRefreshAllWeathers() {
         viewModelScope.launch {
-            if(networkUtils.isInternetAvailable()) {
+            if (networkUtils.isInternetAvailable()) {
                 withContext(Dispatchers.IO) {
-                    repository.refreshAllWeathers()
+                    repository.refreshAllWeathers(preferences.getString("units", "metric")!!)
                 }
                 _userMessage.postValue("Forecasts updated!!")
             } else {
@@ -127,6 +135,8 @@ class WeatherViewModel(
                 val sharedPreferences =
                     PreferenceManager.getDefaultSharedPreferences(application.applicationContext)
                 val networkUtils = NetworkUtils(application.applicationContext)
+
+                Log.i("WeatherViewModel.Factory", "WeatherViewModel creating")
 
                 // Create a SavedStateHandle for this ViewModel from extras
                 return WeatherViewModel(

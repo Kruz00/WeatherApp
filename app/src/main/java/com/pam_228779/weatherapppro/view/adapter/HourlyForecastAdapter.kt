@@ -8,12 +8,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.pam_228779.weatherapppro.R
-import com.pam_228779.weatherapppro.data.model.Hourly
 import com.pam_228779.weatherapppro.data.model.WeatherData
+import com.pam_228779.weatherapppro.utils.temperatureUnit
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.roundToInt
 
 class HourlyForecastAdapter(
@@ -38,7 +39,8 @@ class HourlyForecastAdapter(
                 Instant.ofEpochSecond(forecast.dt.toLong()),
                 ZoneId.of(weatherForecast.timezone)
             ).format(hourlyFormat)
-            holder.hourlyTemp.text = forecast.temp.roundToInt().toString()
+            val temperature = "${forecast.temp.roundToInt()}${temperatureUnit[weatherForecast.units]}"
+            holder.hourlyTemp.text = temperature
             val iconResId = context.resources.getIdentifier(
                 "weather_icon_${forecast.weather.first().icon}",
                 "drawable",

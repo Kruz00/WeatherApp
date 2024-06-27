@@ -6,38 +6,36 @@
     android:orientation="vertical">
     
     <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/weatherBaseInfoContainer"
+        android:id="@+id/currentWeatherContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <TextView
-        android:id="@+id/weatherLocationName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:text="Location Name"
-        android:textAlignment="center"
-        android:textSize="24sp" />
+<!--    <TextView-->
+<!--        android:id="@+id/weatherLocationName"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="16dp"-->
+<!--        android:text="Location Name"-->
+<!--        android:textAlignment="center"-->
+<!--        android:textSize="24sp" />-->
 
-    <!-- Current Weather Display -->
-    <TextView
-        android:id="@+id/current_weather"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:text="Current Weather"
-        android:textAlignment="center"
-        android:textSize="20sp" />
+<!--    &lt;!&ndash; Current Weather Display &ndash;&gt;-->
+<!--    <TextView-->
+<!--        android:id="@+id/current_weather"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="16dp"-->
+<!--        android:text="Current Weather"-->
+<!--        android:textAlignment="center"-->
+<!--        android:textSize="20sp" />-->
 
     <!-- Hourly Forecast Display -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/hourly_forecast_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/current_weather"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginHorizontal="12dp"
         android:orientation="horizontal"
         android:scrollbars="horizontal" />
 
@@ -46,7 +44,6 @@
         android:id="@+id/daily_forecast_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/hourly_forecast_recyclerview"
         android:layout_marginTop="16dp"
         android:orientation="vertical"
         android:scrollbars="vertical" />

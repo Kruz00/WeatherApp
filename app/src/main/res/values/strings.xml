@@ -4,4 +4,7 @@
     <string name="location_name_hint">Wpisz nazwę miejscowości</string>
     <string name="search">Szukaj</string>
     <string name="add_location">Dodaj lokalizację</string>
+    <string name="pressure_text">Ciśnienie: %d %s</string>
+    <string name="wind_speed_text">Wiatr: %.2f %s</string>
+    <string name="feels_like_text">Odczuwalna: %d%s</string>
 </resources>

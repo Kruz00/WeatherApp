@@ -3,24 +3,32 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp">
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="4dp">
 
     <TextView
         android:id="@+id/daily_date"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Monday" />
+        android:layout_gravity="center"
+        android:text="10.26 Mon"
+        android:textSize="20sp"
+        android:textAlignment="center" />
 
     <ImageView
         android:id="@+id/daily_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:src="@drawable/ic_weather" />
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:src="@drawable/weather_icon_02d" />
 
     <TextView
         android:id="@+id/daily_temp"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:text="25°C" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:text="25°C/18°C"
+        android:textSize="20sp"
+        android:textAlignment="center" />
 </LinearLayout>
