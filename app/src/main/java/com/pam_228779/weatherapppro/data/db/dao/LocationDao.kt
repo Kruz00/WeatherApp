@@ -16,9 +16,6 @@ interface LocationDao {
     @Query("SELECT * FROM locations ORDER BY `order` ASC")
     fun getAllLocations(): LiveData<List<LocationEntity>>
 
-//    @Query("SELECT * FROM locations WHERE ")
-//    fun getLocation(): LiveData<List<LocationEntity>>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(location: LocationEntity): Long
 
@@ -29,9 +26,6 @@ interface LocationDao {
     suspend fun updateLocationListOrder(newOrderedList: List<LocationEntity>) {
         newOrderedList.forEachIndexed { index, location ->
             updateLocationOrder(location.id, index)
-//            newLocation = LocationEntity()
-//            location.order = index
-//            updateLocation(location)
             Log.i("LocationDao", "dao update - id: ${location.id}, order: $index")
         }
     }

@@ -5,7 +5,7 @@ import com.pam_228779.weatherapppro.data.model.OneCallApiResponse
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class WeatherApiClient() {
+class WeatherApiClient {
     private val weatherService: WeatherService
 
     private val apiKey = "01197c9af7c8ccccf5cd00f1300e7d0f"

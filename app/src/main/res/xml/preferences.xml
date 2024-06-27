@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <ListPreference
+        app:useSimpleSummaryProvider="true"
         android:key="units"
         android:title="Units"
         android:entries="@array/units"
@@ -9,6 +11,7 @@
         android:defaultValue="metric" />
 
     <ListPreference
+        app:useSimpleSummaryProvider="true"
         android:key="refresh_interval"
         android:title="Time to refresh data"
         android:entries="@array/refresh_options"

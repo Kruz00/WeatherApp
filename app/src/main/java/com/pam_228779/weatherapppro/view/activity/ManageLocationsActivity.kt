@@ -99,15 +99,11 @@ class ManageLocationsActivity : AppCompatActivity() {
 
         Log.i(TAG, "$TAG Activity created")
 
-
-        // Setup RecyclerView and adapter to display and manage locations
     }
 
     override fun onPause() {
         super.onPause()
         Log.i(TAG, "$TAG Activity paused")
-        // update location list order
-//        val currentList: MutableList<LocationEntity> = locationsAdapter.currentList
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

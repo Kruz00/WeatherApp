@@ -8,13 +8,18 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.pam_228779.weatherapppro.R
 import com.pam_228779.weatherapppro.view.adapter.LocationSearchAdapter
 import com.pam_228779.weatherapppro.viewModel.LocationViewModel
 import com.pam_228779.weatherapppro.viewModel.WeatherViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 class AddLocationDialogFragment : DialogFragment() {
 
@@ -22,7 +27,7 @@ class AddLocationDialogFragment : DialogFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         return inflater.inflate(R.layout.fragment_add_location, container, false)
     }
@@ -32,7 +37,8 @@ class AddLocationDialogFragment : DialogFragment() {
 
         val searchButton: Button = view.findViewById(R.id.searchButton)
         val locationInput: EditText = view.findViewById(R.id.locationInput)
-        val searchResultsRecyclerView: RecyclerView = view.findViewById(R.id.searchResultsRecyclerView)
+        val searchResultsRecyclerView: RecyclerView =
+            view.findViewById(R.id.searchResultsRecyclerView)
 
         searchResultsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -41,14 +47,13 @@ class AddLocationDialogFragment : DialogFragment() {
             locationViewModel.searchLocations(locationName)
         }
 
-        locationViewModel.searchResults.observe(viewLifecycleOwner, Observer {locations ->
-            searchResultsRecyclerView.adapter = LocationSearchAdapter(locations) { selectedLocation ->
-                locationViewModel.addLocation(selectedLocation)
-
-                dismiss()
-//              weatherViewModel.refreshWeather(locationEntity)
-            }
-        })
+        locationViewModel.searchResults.observe(viewLifecycleOwner) { locations ->
+            searchResultsRecyclerView.adapter =
+                LocationSearchAdapter(locations) { selectedLocation ->
+                    locationViewModel.addLocation(selectedLocation)
+                    dismiss()
+                }
+        }
     }
 
     override fun onDestroy() {

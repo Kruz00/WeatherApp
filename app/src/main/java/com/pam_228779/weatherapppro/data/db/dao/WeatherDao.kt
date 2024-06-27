@@ -22,6 +22,9 @@ interface WeatherDao {
     @Query("DELETE FROM weathers WHERE locationId = :locationId")
     suspend fun deleteById(locationId: Int)
 
+    @Query("SELECT EXISTS(SELECT * FROM weathers WHERE locationId = :locationId)")
+    suspend fun isWeatherExist(locationId: Int): Boolean
+
     @Update
     suspend fun updateWeathers(weathers: List<WeatherEntity>)
 }

@@ -2,7 +2,6 @@ package com.pam_228779.weatherapppro.viewModel
 
 import android.content.SharedPreferences
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -25,27 +24,33 @@ import java.time.temporal.ChronoUnit
 private const val MINUTES_TO_REFRESH_DEFAULT = 15
 
 
+private const val LAST_WEATHERS_UPDATE_KEY = "lastWeathersUpdate"
+
+private const val REFRESH_INTERVAL_KEY = "refresh_interval"
+
 class WeatherViewModel(
     private val repository: WeatherRepository,
     private val preferences: SharedPreferences,
     private val networkUtils: NetworkUtils,
 ) : ViewModel() {
     private val TAG = "WeatherViewModel"
-    private val weatherDataMap = mutableMapOf<Int, LiveData<WeatherData?>>()
 
     private val _userMessage = MutableLiveData<String>()
     val userMessage: LiveData<String> get() = _userMessage
 
-    fun getWeather(location: LocationEntity): LiveData<WeatherData?> {
-        return weatherDataMap.getOrPut(location.id) {
-            val weatherData = repository.getWeather(location.id)
-            if (weatherData.value == null) {
-                Log.i(TAG, "Weather for new locId: ${location.id}")
-                refreshWeather(location)
-            }
-            return weatherData
+    init {
+        Log.i(TAG, "Init $TAG")
+        refreshAllWeathers()
+    }
 
+
+    fun getWeather(location: LocationEntity): LiveData<WeatherData?> {
+        val weatherData = repository.getLiveWeather(location.id)
+        if (weatherData.value == null) {
+//            Log.i(TAG, "Weather for new locId: ${location.id}")
+            updateIfNoWeather(location)
         }
+        return weatherData
     }
 
     fun deleteWeather(locationId: Int) {
@@ -54,50 +59,48 @@ class WeatherViewModel(
         }
     }
 
-    fun refreshWeather(location: LocationEntity) {
-        viewModelScope.launch {
-            if (networkUtils.isInternetAvailable()) {
-                withContext(Dispatchers.IO) {
-                    repository.refreshWeather(location, preferences.getString("units", "metric")!!)
-                }
-            } else {
-                _userMessage.postValue("No internet connection")
-            }
-        }
-
-    }
-
-    fun refreshAllWeathers() {
-        // check last update time and refresh
+    private fun updateIfNoWeather(location: LocationEntity) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val oldestWeather = repository.getOldestWeather()
-                if (oldestWeather != null) {
-                    val lastRefreshInstant =
-                        Instant.ofEpochSecond(oldestWeather.current.dt.toLong())
-                    val minutesToRefresh =
-                        preferences.getString(
-                            "refresh_interval",
-                            MINUTES_TO_REFRESH_DEFAULT.toString()
-                        )!!.toLong()
-                    val now = Instant.now()
-                    Log.i(
-                        TAG,
-                        "lastRefresh: ${lastRefreshInstant}\nminutesToRefresh: $minutesToRefresh\nInstantNow: $now"
-                    )
-                    if (now.isAfter(lastRefreshInstant.plus(minutesToRefresh, ChronoUnit.MINUTES))
-                    ) {
-                        if (networkUtils.isInternetAvailable()) {
-                            repository.refreshAllWeathers(
-                                preferences.getString(
-                                    "units",
-                                    "metric"
-                                )!!
-                            )
-                            _userMessage.postValue("Forecasts updated!")
-                        } else {
-                            _userMessage.postValue("No internet connection, forecast may be not accurate")
-                        }
+                if (!repository.isWeatherForLocation(location)) {
+                    Log.i(TAG, "Weather for new locId: ${location.id}")
+                    if (networkUtils.isInternetAvailable()) {
+                        repository.newWeatherLocation(
+                            location,
+                            preferences.getString("units", "metric")!!
+                        )
+                    } else {
+                        _userMessage.postValue("No internet connection")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun refreshAllWeathers() {
+        // check last update time and refresh
+        viewModelScope.launch {
+            val lastUpdate = preferences.getLong(LAST_WEATHERS_UPDATE_KEY, 0)
+            val lastUpdateInstant = Instant.ofEpochSecond(lastUpdate)
+            val minutesToRefresh =
+                preferences.getString(REFRESH_INTERVAL_KEY, MINUTES_TO_REFRESH_DEFAULT.toString())!!.toLong()
+            val now = Instant.now()
+            Log.i(TAG, "lastRefresh: ${lastUpdateInstant}\nminutesToRefresh: $minutesToRefresh\nInstantNow: $now")
+            if (now.isAfter(lastUpdateInstant.plus(minutesToRefresh, ChronoUnit.MINUTES))) {
+                Log.i(TAG, "Refreshing weathers")
+                withContext(Dispatchers.IO) {
+                    if (networkUtils.isInternetAvailable()) {
+                        repository.refreshAllWeathers(
+                            preferences.getString(
+                                "units",
+                                "metric"
+                            )!!
+                        )
+                        preferences.edit().putLong(LAST_WEATHERS_UPDATE_KEY, now.epochSecond)
+                            .apply()
+                        _userMessage.postValue("Forecasts updated!")
+                    } else {
+                        _userMessage.postValue("No internet connection, forecast may be outdated")
                     }
                 }
             }
@@ -110,12 +113,13 @@ class WeatherViewModel(
                 withContext(Dispatchers.IO) {
                     repository.refreshAllWeathers(preferences.getString("units", "metric")!!)
                 }
+                preferences.edit().putLong(LAST_WEATHERS_UPDATE_KEY, Instant.now().epochSecond)
+                    .apply()
                 _userMessage.postValue("Forecasts updated!!")
             } else {
                 _userMessage.postValue("No internet connection!")
             }
         }
-
     }
 
     companion object {
@@ -147,34 +151,4 @@ class WeatherViewModel(
             }
         }
     }
-
-
-//    private val repository: WeatherRepository
-//    private val _favouriteLocations = MutableLiveData<List<LocationEntity>>()
-//    val favouriteLocations: LiveData<List<LocationEntity>> = _favouriteLocations
-//
-//    init {
-//        val favouriteLocationDao = AppDatabase.getDatabase(application).favouriteLocationDao()
-//        val weatherApiClient = WeatherApiClient()
-//        repository = WeatherRepository(favouriteLocationDao, weatherApiClient)
-//
-//        loadFavoriteLocations()
-//    }
-//
-//    private fun loadFavoriteLocations() {
-//        viewModelScope.launch {
-//            _favouriteLocations.postValue(repository.getAllFavoriteLocations())
-//        }
-//    }
-//
-//    fun fetchWeather(location: LocationEntity) {
-//        repository.getWeather(location)?.run {
-//            loadFavoriteLocations()
-//        }
-//    }
-//
-//    fun fetchWeatherForAll() {
-//        favouriteLocations.value?.forEach { fetchWeather(it) }
-//    }
-
 }

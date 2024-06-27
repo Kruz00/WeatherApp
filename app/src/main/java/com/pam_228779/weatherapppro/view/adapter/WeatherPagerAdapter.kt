@@ -24,17 +24,9 @@ class WeatherPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(act
         return locations.any { it.id.toLong() == itemId }
     }
 
-//    override fun getItemId(position: Int): Long {
-//        val itemId = locations.indexOfFirst { it.order == position }
-//        Log.i("WeatherPagerAdapter", "getItemId - position: $position, itemId: $itemId, name:${locations[itemId].name}")
-//        return itemId.toLong()
-////        return super.getItemId(position)
-//    }
-
     override fun createFragment(position: Int): Fragment {
         val fragment = WeatherFragment()
         fragment.arguments = Bundle().apply {
-//            putParcelable("location", locations[position])
             putParcelable("locationEntity", locations[position])
             Log.i("WeatherPagerAdapter", "createFragment - position: $position, order: ${locations[position].order}")
         }

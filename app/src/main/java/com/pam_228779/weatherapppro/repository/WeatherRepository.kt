@@ -24,33 +24,32 @@ class WeatherRepository(
     //    private val units = "metric"
     private val exclude = "minutely,alerts"
 
+    val weatherDataMap = mutableMapOf<Int, LiveData<WeatherData?>>()
 
-    fun getWeather(locationId: Int): LiveData<WeatherData?> {
-        val liveWeatherEntity = weatherDao.getWeather(locationId)
-        return liveWeatherEntity.map { weatherEntity ->
-            if (weatherEntity != null) {
-                return@map Gson().fromJson(
-                    weatherEntity.weatherData,
+
+    fun getLiveWeather(locationId: Int): LiveData<WeatherData?> {
+        return weatherDataMap.getOrPut(locationId) {
+            return weatherDao.getWeather(locationId).map {
+                Gson().fromJson(
+                    it?.weatherData,
                     WeatherData::class.java
                 )
             }
-            return@map null
         }
-
     }
 
     suspend fun deleteWeather(locationId: Int) {
         weatherDao.deleteById(locationId)
     }
 
-    suspend fun refreshWeather(location: LocationEntity, units: String) {
-        Log.i(TAG, " Start refreshing weather for locId: ${location.id}")
+    suspend fun newWeatherLocation(location: LocationEntity, units: String) {
+        Log.i(TAG, "newWeatherLocation - Start updating weather for locId: ${location.id}")
         val weather =
             weatherApiClient.getOneCall(location.lat, location.lon, language, units, exclude)
                 ?.let { WeatherData(it, units) }
         val weatherEntity =
             WeatherEntity(location.id, location.lat, location.lon, Gson().toJson(weather))
-        Log.i(TAG, "End refreshing weather for locId: ${weatherEntity.locationId}")
+        Log.i(TAG, "End updating weather for locId: ${weatherEntity.locationId}")
         weatherDao.insert(weatherEntity)    // TODO if livedata don't work, make update then insert if not already exist
     }
 
@@ -59,7 +58,7 @@ class WeatherRepository(
         coroutineScope {
             allWeathers.forEach { weatherEntity ->
                 launch(Dispatchers.IO) {
-                    Log.i(TAG, " Start refreshing weather for locId: ${weatherEntity.locationId}")
+                    Log.i(TAG, "refreshAllWeathers - Start refreshing weather for locId: ${weatherEntity.locationId}")
                     weatherEntity.weatherData = Gson().toJson(
                         weatherApiClient.getOneCall(
                             weatherEntity.lat,
@@ -77,13 +76,7 @@ class WeatherRepository(
         weatherDao.updateWeathers(allWeathers)
     }
 
-    suspend fun getOldestWeather(): WeatherData? {
-        val allWeathers = weatherDao.getAllWeathers().map { weatherEntity ->
-            Gson().fromJson(
-                weatherEntity.weatherData,
-                WeatherData::class.java
-            )
-        }
-        return allWeathers.minByOrNull { it.current.dt }
+    suspend fun isWeatherForLocation(location: LocationEntity): Boolean {
+        return weatherDao.isWeatherExist(location.id)
     }
 }

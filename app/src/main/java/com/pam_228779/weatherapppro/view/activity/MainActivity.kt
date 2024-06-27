@@ -1,6 +1,7 @@
 package com.pam_228779.weatherapppro.view.activity
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -8,7 +9,6 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import androidx.viewpager2.widget.ViewPager2
 import com.pam_228779.weatherapppro.R
@@ -25,6 +25,14 @@ class MainActivity : AppCompatActivity() {
     private val locationViewModel: LocationViewModel by viewModels { LocationViewModel.Factory }
     private val weatherViewModel: WeatherViewModel by viewModels { WeatherViewModel.Factory }
 
+    private val listener = SharedPreferences.OnSharedPreferenceChangeListener(
+        fun(sharedPreferences: SharedPreferences?, key: String?) {
+            if (key == "units") {
+                weatherViewModel.forceRefreshAllWeathers()
+                Log.i(TAG, "units changed")
+            }
+        })
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -32,17 +40,20 @@ class MainActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.mainViewPager)
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
-        weatherViewModel.refreshAllWeathers()
+
+        PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            .registerOnSharedPreferenceChangeListener(listener)
+
         adapter = WeatherPagerAdapter(this)
         viewPager.adapter = adapter
 
         // Observe locations and update adapter
-        locationViewModel.allLocations.observe(this, Observer { locations ->
+        locationViewModel.allLocations.observe(this) { locations ->
             locations?.let {
                 adapter.submitList(it)
                 Log.i(TAG, "locations updated by observator")
             }
-        })
+        }
 
         weatherViewModel.userMessage.observe(this) { message ->
             Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
@@ -84,9 +95,12 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         Log.i(TAG, "$TAG Activity resumed")
-        // update location list order
-//        adapter.submitList()
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        PreferenceManager.getDefaultSharedPreferences(applicationContext)
+            .unregisterOnSharedPreferenceChangeListener(listener)
     }
 
 }
