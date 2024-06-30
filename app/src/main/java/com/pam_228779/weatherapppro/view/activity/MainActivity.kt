@@ -1,7 +1,6 @@
 package com.pam_228779.weatherapppro.view.activity
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -25,13 +24,6 @@ class MainActivity : AppCompatActivity() {
     private val locationViewModel: LocationViewModel by viewModels { LocationViewModel.Factory }
     private val weatherViewModel: WeatherViewModel by viewModels { WeatherViewModel.Factory }
 
-    private val listener = SharedPreferences.OnSharedPreferenceChangeListener(
-        fun(sharedPreferences: SharedPreferences?, key: String?) {
-            if (key == "units") {
-                weatherViewModel.forceRefreshAllWeathers()
-                Log.i(TAG, "units changed")
-            }
-        })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,13 +33,9 @@ class MainActivity : AppCompatActivity() {
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true)
 
-        PreferenceManager.getDefaultSharedPreferences(applicationContext)
-            .registerOnSharedPreferenceChangeListener(listener)
-
         adapter = WeatherPagerAdapter(this)
         viewPager.adapter = adapter
 
-        // Observe locations and update adapter
         locationViewModel.allLocations.observe(this) { locations ->
             locations?.let {
                 adapter.submitList(it)
@@ -79,7 +67,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             R.id.refresh_weather -> {
-                weatherViewModel.forceRefreshAllWeathers()
+                weatherViewModel.refreshAllWeathers()
                 true
             }
 
@@ -97,10 +85,5 @@ class MainActivity : AppCompatActivity() {
         Log.i(TAG, "$TAG Activity resumed")
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        PreferenceManager.getDefaultSharedPreferences(applicationContext)
-            .unregisterOnSharedPreferenceChangeListener(listener)
-    }
 
 }

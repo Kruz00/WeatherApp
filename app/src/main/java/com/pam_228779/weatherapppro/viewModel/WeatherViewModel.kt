@@ -15,39 +15,52 @@ import com.pam_228779.weatherapppro.data.db.entities.LocationEntity
 import com.pam_228779.weatherapppro.data.model.WeatherData
 import com.pam_228779.weatherapppro.repository.WeatherRepository
 import com.pam_228779.weatherapppro.utils.NetworkUtils
+import com.pam_228779.weatherapppro.utils.WeatherRefresher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.Instant
-import java.time.temporal.ChronoUnit
-
-private const val MINUTES_TO_REFRESH_DEFAULT = 15
 
 
 private const val LAST_WEATHERS_UPDATE_KEY = "lastWeathersUpdate"
-
-private const val REFRESH_INTERVAL_KEY = "refresh_interval"
 
 class WeatherViewModel(
     private val repository: WeatherRepository,
     private val preferences: SharedPreferences,
     private val networkUtils: NetworkUtils,
 ) : ViewModel() {
+    private val weatherRefresher = WeatherRefresher(preferences, ::refreshAllWeathers)
+
     private val TAG = "WeatherViewModel"
 
     private val _userMessage = MutableLiveData<String>()
     val userMessage: LiveData<String> get() = _userMessage
 
+    private val listener = SharedPreferences.OnSharedPreferenceChangeListener(
+        fun(sharedPreferences: SharedPreferences?, key: String?) {
+            if (key == "units") {
+                refreshAllWeathers()
+                Log.i(TAG, "units changed")
+            } else if (key == "refresh_interval") {
+                weatherRefresher.restart()
+            }
+        })
+
     init {
         Log.i(TAG, "Init $TAG")
-        refreshAllWeathers()
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        weatherRefresher.restart()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        preferences.unregisterOnSharedPreferenceChangeListener(listener)
     }
 
 
     fun getWeather(location: LocationEntity): LiveData<WeatherData?> {
         val weatherData = repository.getLiveWeather(location.id)
         if (weatherData.value == null) {
-//            Log.i(TAG, "Weather for new locId: ${location.id}")
             updateIfNoWeather(location)
         }
         return weatherData
@@ -77,37 +90,7 @@ class WeatherViewModel(
         }
     }
 
-    private fun refreshAllWeathers() {
-        // check last update time and refresh
-        viewModelScope.launch {
-            val lastUpdate = preferences.getLong(LAST_WEATHERS_UPDATE_KEY, 0)
-            val lastUpdateInstant = Instant.ofEpochSecond(lastUpdate)
-            val minutesToRefresh =
-                preferences.getString(REFRESH_INTERVAL_KEY, MINUTES_TO_REFRESH_DEFAULT.toString())!!.toLong()
-            val now = Instant.now()
-            Log.i(TAG, "lastRefresh: ${lastUpdateInstant}\nminutesToRefresh: $minutesToRefresh\nInstantNow: $now")
-            if (now.isAfter(lastUpdateInstant.plus(minutesToRefresh, ChronoUnit.MINUTES))) {
-                Log.i(TAG, "Refreshing weathers")
-                withContext(Dispatchers.IO) {
-                    if (networkUtils.isInternetAvailable()) {
-                        repository.refreshAllWeathers(
-                            preferences.getString(
-                                "units",
-                                "metric"
-                            )!!
-                        )
-                        preferences.edit().putLong(LAST_WEATHERS_UPDATE_KEY, now.epochSecond)
-                            .apply()
-                        _userMessage.postValue("Forecasts updated!")
-                    } else {
-                        _userMessage.postValue("No internet connection, forecast may be outdated")
-                    }
-                }
-            }
-        }
-    }
-
-    fun forceRefreshAllWeathers() {
+    fun refreshAllWeathers() {
         viewModelScope.launch {
             if (networkUtils.isInternetAvailable()) {
                 withContext(Dispatchers.IO) {
